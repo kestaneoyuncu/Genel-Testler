@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kişilik Testi</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .quiz-container {
+      background: white;
+      width: 600px;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      transition: opacity 0.5s ease-in-out;
+    }
+    h2 {
+      margin-bottom: 20px;
+      transition: opacity 0.5s ease-in-out;
+    }
+    .answers {
+      display: flex;
+      justify-content: space-between;
+      margin: 25px 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    .answer-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: white;
+      transform: scale(1);
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+    .answer-btn:hover {
+      transform: scale(1.15);
+    }
+    .answer-btn.selected {
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      transform: scale(1.2);
+    }
+    button#nextBtn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    button#nextBtn:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+    #result {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+    }
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    .fade-out {
+      opacity: 0;
+    }
+    .fade-in {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-container">
+  <h2 id="question">1. Yeni insanlarla tanışmayı severim.</h2>
+
+  <!-- ÜSTTE ETİKETLER -->
+  <div class="label-row">
+    <span>Katılmıyorum</span>
+    <span>Tarafsız</span>
+    <span>Katılıyorum</span>
+  </div>
+
+  <div class="answers" id="answers">
+    <!-- Butonlar burada üretilecek -->
+  </div>
+
+  <button id="nextBtn" onclick="nextQuestion()">İleri</button>
+  <div id="result"></div>
+</div>
+
+<script>
+const questions = [
+  "Yeni insanlarla tanışmayı severim.",
+  "Yalnız kalmaktan hoşlanırım.",
+  "Risk almayı severim.",
+  "Planlı ve programlı olmayı severim.",
+  "Çevremdeki insanlara yardım etmeyi severim.",
+  "Eleştirilere karşı sakin kalabilirim.",
+  "Yeni şeyler öğrenmek bana heyecan verir.",
+  "Stresli ortamlarda rahat kalırım.",
+  "İnsanlara kolay güvenirim.",
+  "Duygularımı ifade etmekte rahatım."
+];
+
+let currentQuestion = 0;
+let score = 0;
+
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const resultEl = document.getElementById("result");
+
+// 🎨 Buton renkleri ve değerleri
+const choices = [
+  { text: "-3", color: "#e74c3c", value: -3 },
+  { text: "-2", color: "#e67e22", value: -2 },
+  { text: "-1", color: "#f1c40f", value: -1 },
+  { text: "0",  color: "#bdc3c7", value: 0 },
+  { text: "+1", color: "#2ecc71", value: 1 },
+  { text: "+2", color: "#27ae60", value: 2 },
+  { text: "+3", color: "#1e8449", value: 3 },
+];
+
+loadAnswers();
+
+function loadAnswers() {
+  answersEl.innerHTML = "";
+  choices.forEach(c => {
+    const btn = document.createElement("button");
+    btn.classList.add("answer-btn");
+    btn.textContent = c.text;
+    btn.style.backgroundColor = c.color;
+    btn.onclick = () => selectAnswer(btn, c.value);
+    answersEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(btn, value) {
+  document.querySelectorAll(".answer-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  btn.dataset.value = value;
+}
+
+function nextQuestion() {
+  const selected = document.querySelector(".answer-btn.selected");
+  if (!selected) {
+    alert("Lütfen bir seçenek seçin!");
+    return;
+  }
+
+  score += parseInt(selected.dataset.value);
+
+  // Fade-out animasyonu başlat
+  questionEl.classList.add("fade-out");
+  answersEl.classList.add("fade-out");
+
+  setTimeout(() => {
+    currentQuestion++;
+
+    if (currentQuestion < questions.length) {
+      // Yeni soruyu yükle
+      questionEl.textContent = (currentQuestion + 1) + ". " + questions[currentQuestion];
+      document.querySelectorAll(".answer-btn").forEach(b => b.classList.remove("selected"));
+
+      // Fade-in
+      questionEl.classList.remove("fade-out");
+      answersEl.classList.remove("fade-out");
+      questionEl.classList.add("fade-in");
+      answersEl.classList.add("fade-in");
+    } else {
+      showResult();
+    }
+  }, 300);
+}
+
+function showResult() {
+  questionEl.style.display = "none";
+  answersEl.style.display = "none";
+  document.querySelector(".label-row").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+
+  let message = "";
+  if (score <= -5) {
+    message = "İçe dönük, sakin bir yapın var.";
+  } else if (score <= 10) {
+    message = "Dengeli ve uyumlu bir kişiliğin var.";
+  } else {
+    message = "Dışa dönük, enerjik ve sosyal bir yapın var!";
+  }
+
+let results = JSON.parse(localStorage.getItem("testResults")) || {};
+results["🧠 Psikoloji Testi"] = message;  
+localStorage.setItem("testResults", JSON.stringify(results));
+
+  resultEl.textContent = "Sonuç: " + message;
+
+  // Sonucu fade-in yap
+  setTimeout(() => {
+    resultEl.style.opacity = "1";
+  }, 200);
+}
+</script>
+
+</body>
+</html>

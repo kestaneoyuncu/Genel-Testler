@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cinsel Yönelim Testi</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .quiz-container {
+      background: white;
+      width: 600px;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      transition: opacity 0.5s ease-in-out;
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .answers {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px 0;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    .answer-btn {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      background-color: #5c91f3;
+      color: white;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .answer-btn:hover {
+      background-color: #3f6fe2;
+      transform: scale(1.03);
+    }
+    #nextBtn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.3s ease;
+    }
+    #nextBtn:hover {
+      background-color: #45a049;
+    }
+    #result {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+    }
+    .orientation-list {
+      margin-top: 25px;
+      text-align: left;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .orientation-list h3 {
+      margin-bottom: 8px;
+      color: #444;
+    }
+    .orientation-list p {
+      margin: 4px 0 10px;
+      color: #555;
+    }
+    .fade-out {
+      opacity: 0;
+    }
+    .fade-in {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-container">
+  <h2 id="question">1. Aynı cinsiyetten birine ilgi duydun mu?</h2>
+
+  <div class="answers" id="answers"></div>
+  <button id="nextBtn" onclick="nextQuestion()">İleri</button>
+  <div id="result"></div>
+
+  <!-- buraya sonuç sonrası yönelim listesi gelecek -->
+  <div class="orientation-list" id="orientationList" style="display:none;">
+    <h3>🌈 Cinsel Yönelim Türleri</h3>
+    <p><strong>Heteroseksüel:</strong> Karşı cinse ilgi duyan kişi.</p>
+    <p><strong>Homoseksüel (Gay/Lezbiyen):</strong> Aynı cinse ilgi duyan kişi.</p>
+    <p><strong>Biseksüel:</strong> Hem kendi cinsine hem karşı cinse ilgi duyan kişi.</p>
+    <p><strong>Panseksüel:</strong> Cinsiyetten bağımsız olarak kişiye ilgi duyan kişi.</p>
+    <p><strong>Aseksüel:</strong> Cinsel çekim hissetmeyen kişi.</p>
+    <p><strong>Demiseksüel:</strong> Sadece duygusal bağ kurduğunda cinsel çekim hisseden kişi.</p>
+    <p><strong>Queer:</strong> Klasik yönelim tanımlarına uymayan geniş kimlik.</p>
+    <p><strong>Skoloseksüel:</strong> Trans veya non-binary kişilere ilgi duyan kişi.</p>
+    <p><strong>Androseksüel:</strong> Erkeklere veya erkeksi özelliklere ilgi duyan kişi.</p>
+    <p><strong>Gynoseksüel:</strong> Kadınlara veya kadınsı özelliklere ilgi duyan kişi.</p>
+  </div>
+</div>
+
+<script>
+const questions = [
+  "Aynı cinsiyetten birine ilgi duydun mu?",
+  "Karşı cinsle flört ederken daha rahat hissediyor musun?",
+  "Onur yürüyüşüne katılır mısın?",
+  "Aynı cinsten biri sana çıkma teklifi etse kabul eder misin?",
+  "LGBT bireylerle aynı ortamda bulunmak seni rahatsız eder mi?",
+  "Hangi cinsiyetten ünlülere daha çok ilgi duyarsın?",
+  "Cinsel yönelimini sorguladığın oldu mu?",
+  "Yakın arkadaşlarının cinsel yönelimi senin için önemli mi?",
+  "Partnerinin farklı yönelimde olması seni etkiler mi?",
+  "Aynı cinsten biriyle öpüşmeyi düşünür müsün?"
+];
+
+let currentQuestion = 0;
+let gayScore = 0;
+let homoScore = 0;
+
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const resultEl = document.getElementById("result");
+const orientationList = document.getElementById("orientationList");
+
+function loadAnswers() {
+  answersEl.innerHTML = "";
+  const options = [
+    { text: "Kesinlikle Hayır", gay: 0, homo: 2 },
+    { text: "Hayır", gay: 1, homo: 1 },
+    { text: "Emin değilim", gay: 1, homo: 1 },
+    { text: "Evet", gay: 2, homo: 0 },
+    { text: "Kesinlikle Evet", gay: 3, homo: 0 }
+  ];
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.classList.add("answer-btn");
+    btn.textContent = opt.text;
+    btn.onclick = () => selectAnswer(opt);
+    answersEl.appendChild(btn);
+  });
+}
+loadAnswers();
+
+function selectAnswer(opt) {
+  gayScore += opt.gay;
+  homoScore += opt.homo;
+  nextQuestion();
+}
+
+function nextQuestion() {
+  questionEl.classList.add("fade-out");
+  answersEl.classList.add("fade-out");
+
+  setTimeout(() => {
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      questionEl.textContent = (currentQuestion + 1) + ". " + questions[currentQuestion];
+
+      questionEl.classList.remove("fade-out");
+      answersEl.classList.remove("fade-out");
+      questionEl.classList.add("fade-in");
+      answersEl.classList.add("fade-in");
+    } else {
+      showResult();
+    }
+  }, 300);
+}
+
+function showResult() {
+  questionEl.style.display = "none";
+  answersEl.style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+
+  let gayPercent = Math.round((gayScore / (questions.length * 3)) * 100);
+  let homoPercent = Math.round((homoScore / (questions.length * 2)) * 100);
+
+  let message = `%${gayPercent} eşcinsel yönelimin var.\n%${homoPercent} heteroseksüelsin.`;
+
+  resultEl.textContent = "Sonuç: " + message;
+
+  // ✅ sonucu kaydet
+  let results = JSON.parse(localStorage.getItem("testResults")) || {};
+  results["🌈 Cinsel Yönelim Testi"] = message;
+  localStorage.setItem("testResults", JSON.stringify(results));
+
+  setTimeout(() => {
+    resultEl.style.opacity = "1";
+    orientationList.style.display = "block"; // ✅ yönelim listesi görünür hale gelecek
+  }, 200);
+}
+</script>
+
+</body>
+</html>
